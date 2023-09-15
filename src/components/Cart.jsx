@@ -36,7 +36,7 @@ export function Cart() {
             .then((res) => res.json())
             .then((data) => {
                 console.log(data);
-                dispatch({ type: 'set', payload: data });
+                dispatch({type: 'set', payload: data});
                 setLoading(false)
             })
     }, [isLoading])
@@ -63,8 +63,8 @@ export function Cart() {
     }
 
     return (
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+        <div className="ml-4 lg:ml-12 mt-4 lg:mt-12 max-w-2xl px-4 py-6 sm:px-4 sm:py-4 lg:max-w-4xl lg:px-6 bg-amber-50 rounded-md">
+            <ul role="list" className="divide-dashed divide-y-4 divide-amber-100">
                 {products.map((product) => {
                         return (
                             <CartItem key={product.productId} item={{
@@ -79,8 +79,8 @@ export function Cart() {
                         )
                     }
                 )}
-            </div>
-            <h1>{`Total price: ${total}`}</h1>
+                <li><h1>{`Total price: ${total}`}</h1></li>
+            </ul>
         </div>
     )
 }

@@ -2,6 +2,8 @@
 
 import React, {useState} from "react";
 import {AiFillDelete} from "react-icons/ai";
+import {LuDelete} from "react-icons/lu";
+import {MdOutlineDelete} from "react-icons/md";
 
 export function CartItem({item, deleteItem, setLoading}) {
     const [quantity, setQuantity] = useState(item.quantity);
@@ -37,6 +39,41 @@ export function CartItem({item, deleteItem, setLoading}) {
     }
 
     return (
+        <li className="flex justify-between gap-x-6 py-5">
+            <div className="basis-1/2 flex min-w-0 gap-x-4">
+                <img className="h-24 w-24 flex-none rounded-md bg-gray-50" src={image} alt={album} />
+                <div className="min-w-0 flex-auto">
+                    <p className="ml-12 mt-2 break-words text-xl font-semibold leading-6 text-gray-900">{album}</p>
+                    <p className="ml-12 mt-2 truncate text-lg leading-5 text-gray-700">{artist}</p>
+                    <p className="ml-12 mt-2 truncate text-lg leading-5 text-gray-500">{genre}</p>
+                </div>
+            </div>
+            <div className="basis-1/4">
+                <div className="mt-6">
+                    <button
+                        className="text-white aspect-square bg-amber-700 hover:bg-amber-800 font-bold rounded-md text-md w-6"
+                        onClick={() => changeQuantity(-1)}>
+                        -
+                    </button>
+                    <span className="text-2xl">{` ${quantity} `}</span>
+                    <button
+                        className="text-white aspect-square bg-amber-700 hover:bg-amber-800 font-bold rounded-md text-md w-6"
+                        onClick={() => changeQuantity(1)}>
+                        +
+                    </button>
+                </div>
+            </div>
+            <div className="basis-1/4">
+                <p className="mt-2 text-xl font-medium text-gray-900">{`€${price}`}</p>
+                <button type="button" className="mt-2 rounded-md text-gray-700" id="add"
+                        onClick={deleteFromCart}>
+                    <MdOutlineDelete size={"2rem"} color={"#573d38"}/>
+                </button>
+            </div>
+        </li>
+    )
+
+    /*return (
         <div className="group relative bg-amber-50 shadow-2xl p-2 rounded-lg">
             <div
                 className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-95 lg:h-80">
@@ -69,5 +106,5 @@ export function CartItem({item, deleteItem, setLoading}) {
                 </button>
             </div>
         </div>
-    );
+    );*/
 }
