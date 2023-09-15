@@ -12,8 +12,8 @@ export async function GET(req) {
     if (query) {
         products = await Product.find({
             $or: [
-                { album: { $regex: query, $options: 'i' } }, // Case-insensitive regex search on field1
-                { artist: { $regex: query, $options: 'i' } }, // Case-insensitive regex search on field2
+                { album: { $regex: query, $options: 'i' } },
+                { artist: { $regex: query, $options: 'i' } },
             ],
         });
     } else {

@@ -55,8 +55,6 @@ export async function PATCH(req, {params}) {
     const id = params.id;
     const {amount} = await req.json();
 
-    console.log(`Updated quantity of id: ${id}`);
-
     await connectMongoDB();
 
     await Cart.findOne({userName: userName})
@@ -78,9 +76,21 @@ export async function PATCH(req, {params}) {
 }
 
 export async function DELETE(req, {params}) {
+    const session = await getServerSession(authConfig);
+    const userName = session?.user?.name;
     const id = params.id;
 
-    // await connectMongoDB();
+    await connectMongoDB();
 
-    return NextResponse.json({id, text: `Deleted product with id: ${id}`});
+    await Cart.updateMany({userName: userName}, {
+        $pull: {
+            cartItems: {productId: id}
+        }
+    })
+        .exec()
+        .catch((error) => {
+            console.error(`Error deleting item with id: ${id}:`, error);
+        });
+
+    return NextResponse.json({});
 }
