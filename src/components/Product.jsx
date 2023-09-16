@@ -3,6 +3,7 @@
 import React, {useState} from 'react';
 import {useSession} from "next-auth/react";
 import {AiFillShopping} from "react-icons/ai";
+import Link from "next/link";
 
 export default function Product({item}) {
     const [quantity, setQuantity] = useState(1);
@@ -50,7 +51,7 @@ export default function Product({item}) {
 
 
     return (
-        <div className="group relative bg-amber-50 shadow-2xl p-2 rounded-lg">
+        <div className="group relative bg-white shadow-2xl p-2 rounded-lg">
             <div
                 className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-95 lg:h-80">
                 <img src={image}
@@ -72,7 +73,9 @@ export default function Product({item}) {
             </div>
             <div className="mt-4 flex flex-row justify-between">
                 <div className="flex-1">
-                    <p className="text-xl text-gray-700">{album}</p>
+                    <Link href={`/content/${productId}`}>
+                        <p className="text-xl text-gray-700 hover:underline">{album}</p>
+                    </Link>
                     <p className="mt-1 text-sm text-gray-500">{artist}</p>
                 </div>
                 <div>

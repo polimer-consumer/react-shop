@@ -63,7 +63,7 @@ export function Cart() {
     }
 
     return (
-        <div className="ml-4 lg:ml-12 mt-4 lg:mt-12 max-w-2xl px-4 py-6 sm:px-4 sm:py-4 lg:max-w-4xl lg:px-6 bg-amber-50 rounded-md">
+        <div className="ml-4 lg:ml-12 mt-4 lg:mt-12 max-w-2xl px-4 py-6 sm:px-4 sm:py-4 lg:max-w-4xl lg:px-6 bg-white rounded-md">
             <ul role="list" className="divide-dashed divide-y-4 divide-amber-100">
                 {products.map((product) => {
                         return (
