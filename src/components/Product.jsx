@@ -7,7 +7,6 @@ import Link from "next/link";
 
 export default function Product({item}) {
     const [quantity, setQuantity] = useState(1);
-    const session = useSession();
 
     const changeQuantity = (amount) => {
         setQuantity((prevQuantity) => {
@@ -22,7 +21,6 @@ export default function Product({item}) {
 
     const addToCart = async () => {
         const reqBody = JSON.stringify({
-            userName: session?.data?.user?.name,
             album: album,
             artist: artist,
             genre: genre,

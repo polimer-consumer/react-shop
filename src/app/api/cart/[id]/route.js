@@ -6,7 +6,9 @@ import {authConfig} from "@/configs/auth";
 
 export async function POST(req, {params}) {
     const productId = params.id;
-    const {userName, album, artist, genre, price, image, quantity} = await req.json();
+    const session = await getServerSession(authConfig);
+    const userName = session?.user?.name;
+    const {album, artist, genre, price, image, quantity} = await req.json();
 
     await connectMongoDB();
 

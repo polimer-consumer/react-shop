@@ -25,7 +25,6 @@ export async function GET(req) {
 
 export async function POST(req) {
     const {body, album, artist, genre, price, image} = await req.json();
-    console.log(body);
 
     await connectMongoDB();
     await Product.create(

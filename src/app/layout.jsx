@@ -17,7 +17,13 @@ export default async function RootLayout({children}) {
     return (
         <html lang="en">
         <body className={inter.className}>
-        <SessionProvider session={session}>
+        <SessionProvider
+            session={session}
+            // Re-fetch session every 5 minutes
+            refetchInterval={20 * 60}
+            // Re-fetches session when window is focused
+            refetchOnWindowFocus={true}
+        >
             <Header/>
             {children}
         </SessionProvider>

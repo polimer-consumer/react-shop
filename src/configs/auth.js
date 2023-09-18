@@ -2,6 +2,11 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import {users} from '@/data/users';
 
 export const authConfig = {
+    strategy: "jwt",
+    session: {
+        maxAge: 24 * 60 * 60, // 1 day
+    },
+
     providers: [
         CredentialsProvider({
             name: 'Credentials',
@@ -22,10 +27,12 @@ export const authConfig = {
                     return userWithoutPassword;
                 }
 
-                return null
+                throw new Error("Wrong password!");
             }
         })
     ],
+    callbacks: {
+    },
     pages: {
         signIn: '/login'
     },

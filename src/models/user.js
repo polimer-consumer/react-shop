@@ -2,9 +2,13 @@ import mongoose, {Schema} from "mongoose";
 
 const userSchema = new Schema(
     {
-        username: String,
         email: String,
-        password: String
+        fistName: String,
+        lastName: String,
+        phone: String,
+        role: String,
+        password: String,
+        salt: String
     },
     {
         timestamps: true

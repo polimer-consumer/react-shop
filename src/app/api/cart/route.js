@@ -7,7 +7,10 @@ import {authConfig} from "@/configs/auth";
 export async function GET(req) {
     const session = await getServerSession(authConfig);
     const userName = session?.user?.name;
-    console.log(session);
+
+    if (!userName) {
+        return NextResponse.json([]);
+    }
 
     await connectMongoDB();
 

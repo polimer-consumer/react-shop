@@ -8,7 +8,6 @@ export function ProductPage({id}) {
     const [showInfo, setShowInfo] = useState(false);
     const [showContacts, setShowContacts] = useState(false);
     const [isLoading, setLoading] = useState(true)
-    const session = useSession();
 
     useEffect(() => {
         fetch(`/api/products/${id}`)
@@ -26,7 +25,6 @@ export function ProductPage({id}) {
         const {image, genre, price, artist, album, _id} = product;
         fetch(`/api/cart/${_id}`, {
             method: "POST", body: JSON.stringify({
-                userName: session?.data?.user?.name,
                 album: album,
                 artist: artist,
                 genre: genre,
