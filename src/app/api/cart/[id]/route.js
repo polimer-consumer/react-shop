@@ -7,16 +7,16 @@ import {authConfig} from "@/configs/auth";
 export async function POST(req, {params}) {
     const productId = params.id;
     const session = await getServerSession(authConfig);
-    const userName = session?.user?.name;
+    const email = session?.user?.email;
     const {album, artist, genre, price, image, quantity} = await req.json();
 
     await connectMongoDB();
 
-    await Cart.findOne({userName: userName})
+    await Cart.findOne({userEmail: email})
         .exec()
         .then((cart) => {
             if (!cart) {
-                cart = new Cart({userName: userName, cartItems: []});
+                cart = new Cart({userEmail: email, cartItems: []});
             }
 
             const cartItemIndex = cart.cartItems.findIndex(
@@ -53,13 +53,13 @@ export async function POST(req, {params}) {
 
 export async function PATCH(req, {params}) {
     const session = await getServerSession(authConfig);
-    const userName = session?.user?.name;
+    const email = session?.user?.email;
     const id = params.id;
     const {amount} = await req.json();
 
     await connectMongoDB();
 
-    await Cart.findOne({userName: userName})
+    await Cart.findOne({userEmail: email})
         .exec()
         .then((cart) => {
             const cartItemIndex = cart.cartItems.findIndex(
@@ -79,12 +79,12 @@ export async function PATCH(req, {params}) {
 
 export async function DELETE(req, {params}) {
     const session = await getServerSession(authConfig);
-    const userName = session?.user?.name;
+    const email = session?.user?.email;
     const id = params.id;
 
     await connectMongoDB();
 
-    await Cart.updateMany({userName: userName}, {
+    await Cart.updateMany({userEmail: email}, {
         $pull: {
             cartItems: {productId: id}
         }

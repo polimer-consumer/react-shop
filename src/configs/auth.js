@@ -1,5 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials'
-import {users} from '@/data/users';
+import {connectMongoDB} from "@/database/connect";
+import User from "@/models/user";
+import crypto from "crypto";
+import user from "@/models/user";
 
 export const authConfig = {
     strategy: "jwt",
@@ -17,22 +20,35 @@ export const authConfig = {
             async authorize(credentials) {
                 if (!credentials?.email || !credentials.password) return null;
 
-                console.log(credentials);
+                await connectMongoDB();
 
-                const currentUser = users.find(user => user.email === credentials.email)
+                let currentUser;
 
-                if (currentUser && currentUser.password === credentials.password) {
-                    const {password, ...userWithoutPassword} = currentUser;
+                await User.findOne({email: credentials.email})
+                    .exec()
+                    .then(user => {
+                        currentUser = user;
+                    })
+                    .catch(error => {
+                        console.error('Database error:', error);
+                    })
 
-                    return userWithoutPassword;
+                if (currentUser) {
+                    if (crypto.createHash("md5")
+                        .update(currentUser.salt + credentials.password)
+                        .digest("hex") === currentUser.password) {
+                        const {password, salt, _id, ...userWithoutPassword} = currentUser._doc;
+
+                        return userWithoutPassword;
+                    }
+                    throw new Error("Wrong password");
                 }
 
-                throw new Error("Wrong password!");
+                throw new Error("Wrong email");
             }
         })
     ],
-    callbacks: {
-    },
+    callbacks: {},
     pages: {
         signIn: '/login'
     },

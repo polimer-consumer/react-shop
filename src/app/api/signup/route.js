@@ -1,25 +1,36 @@
 import {connectMongoDB} from "@/database/connect";
 import User from "@/models/user";
-import {error} from "next/dist/build/output/log";
 import {NextResponse} from "next/server";
 
 export async function POST(req) {
-    const {email, password, salt, firstName, lastName, phone} = await req.json();
+    try {
+        const {email, password, salt, firstName, lastName, phone} = await req.json();
+        await connectMongoDB();
 
-    await connectMongoDB();
+        const existingUser = await User.findOne({email})
+            .exec()
+            .catch(error => {
+                console.error('Database error', error);
+            });
 
-    await User.create(
-        {
-            email: email,
-            password: password,
-            salt: salt,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone
-        })
-        .catch(err => {
-            console.error(err);
-            return NextResponse.json({ error: 'Internal Server Error'}, { status: 500 });
-        });
-    return NextResponse.json({});
+        if (existingUser) {
+            return NextResponse.json({error: 'Email already exists'}, {status: 409});
+        }
+
+        await User.create(
+            {
+                email,
+                password,
+                salt,
+                firstName,
+                lastName,
+                phone
+            }
+        );
+
+        return NextResponse.json({}, {status: 200});
+    } catch (err) {
+        console.error(err);
+        return NextResponse.json({error: 'Internal Server Error'}, {status: 500});
+    }
 }

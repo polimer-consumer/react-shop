@@ -6,18 +6,18 @@ import {authConfig} from "@/configs/auth";
 
 export async function GET(req) {
     const session = await getServerSession(authConfig);
-    const userName = session?.user?.name;
+    const email = session?.user?.email;
 
-    if (!userName) {
+    if (!email) {
         return NextResponse.json([]);
     }
 
     await connectMongoDB();
 
     try {
-        let cart = await Cart.findOne({ userName }).exec();
+        let cart = await Cart.findOne({ userEmail: email }).exec();
         if (!cart) {
-            cart = new Cart({ userName, cartItems: [] });
+            cart = new Cart({ email, cartItems: [] });
             await cart.save();
         }
 

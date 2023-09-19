@@ -2,9 +2,12 @@
 
 import React, {useState} from 'react';
 import * as crypto from 'crypto';
+import {useRouter} from "next/navigation";
 
 export default function SignUpForm() {
     const [isWrongPassword, setWrongPassword] = useState(false);
+    const [emailExists, setEmailExists] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -37,16 +40,21 @@ export default function SignUpForm() {
                         return Promise.reject(error);
                     }
 
-                    console.log(`User ${data.get("email")} added`);
+                    router.push("/login");
+                    console.log('User added');
                 })
                 .catch(error => {
-                    console.error('There was an error!', error);
+                    if (error === 409) {
+                        setEmailExists(true);
+                    } else {
+                        console.error('There was an error!', error);
+                    }
                 });
         }
     };
 
     return (
-        <form className="mx-auto my-32 max-w-xl px-4 py-8 lg:max-w-xl lg:px-8 bg-white rounded-2xl"
+        <form className="mx-auto my-16 max-w-xl px-4 py-8 lg:max-w-xl lg:px-8 bg-white rounded-2xl"
               onSubmit={handleSubmit}>
             <div className="mb-6">
                 <label htmlFor="first-name" className="block mb-2 text-sm font-medium text-gray-900">
@@ -55,7 +63,9 @@ export default function SignUpForm() {
                 <input type="first-name" name="first-name"
                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm
                        rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                       placeholder="First name" required>
+                       placeholder="First name"
+                       autoComplete="given-name"
+                       required>
                 </input>
             </div>
             <div className="mb-6">
@@ -65,6 +75,7 @@ export default function SignUpForm() {
                 <input type="last-name" name="last-name"
                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm
                        rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                       autoComplete="family-name"
                        placeholder="Last name">
                 </input>
             </div>
@@ -72,9 +83,10 @@ export default function SignUpForm() {
                 <label htmlFor="phone" className="block mb-2 text-sm font-medium text-gray-900">
                     Your phone number
                 </label>
-                <input type="phone" name="phone"
+                <input type="tel" name="phone"
                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm
                        rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                       autoComplete="tel-country-code"
                        placeholder="Phone number">
                 </input>
             </div>
@@ -85,8 +97,15 @@ export default function SignUpForm() {
                 <input type="email" name="email"
                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm
                        rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                       autoComplete="email"
                        placeholder="your@email.com" required>
                 </input>
+                {emailExists ? (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <span className="font-medium">Oops! </span>
+                        User with this email already exists!
+                    </p>
+                ) : null}
             </div>
             <div className="mb-6">
                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">
@@ -109,7 +128,7 @@ export default function SignUpForm() {
                        required>
                 </input>
                 {isWrongPassword ? (
-                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                    <p className="mt-2 text-sm text-red-600">
                         <span className="font-medium">Oops! </span>
                         Passwords do not match!
                     </p>
@@ -130,7 +149,8 @@ export default function SignUpForm() {
             </div>
             <button type="submit"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
-                    focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center w-1/2">
+                    focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center w-1/2
+                    ease-linear transition-all duration-150">
                 Register new account
             </button>
         </form>

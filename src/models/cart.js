@@ -3,7 +3,7 @@ import {cartItemSchema} from "@/models/cartItem";
 
 const cartSchema = new Schema(
     {
-        userName: String,
+        userEmail: String,
         cartItems: [cartItemSchema]
     },
     {

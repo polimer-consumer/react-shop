@@ -22,12 +22,9 @@ export function LoginForm() {
 
         if (res && !res.error) {
             router.push("/content");
-            setWrongCredentials(false);
         } else {
             setWrongCredentials(true);
         }
-
-        console.log(res);
     }
 
     return (
@@ -53,9 +50,9 @@ export function LoginForm() {
                            required>
                     </input>
                     {isWrongCredentials ? (
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p className="mt-2 text-sm text-red-600">
                             <span className="font-medium">Oops! </span>
-                            Passwords do not match!
+                            Wrong password!
                         </p>
                     ) : null}
                 </div>
