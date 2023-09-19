@@ -1,7 +1,9 @@
 import ProductsList from "@/components/ProductsList";
+import ContentPage from "@/components/ContentPage";
 
 export default function Page() {
     return (
-        <ProductsList/>
+        <ContentPage></ContentPage>
+        // <ProductsList/>
     )
 }

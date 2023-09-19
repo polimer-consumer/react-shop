@@ -2,7 +2,6 @@
 
 import React, {useEffect, useState} from "react";
 import Product from "@/components/Product";
-import styles from '../styles/products.module.css'
 import SearchBar from "@/components/SearchBar";
 
 export default function ProductsList() {

@@ -49,9 +49,9 @@ export default function Product({item}) {
 
 
     return (
-        <div className="group relative bg-white shadow-2xl p-2 rounded-lg">
+        <div className="group relative bg-gray-50 shadow-2xl p-2 rounded-lg">
             <div
-                className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-95 lg:h-80">
+                className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-50 lg:aspect-none group-hover:opacity-95 lg:h-80">
                 <img src={image}
                      alt={album}
                      className="h-full w-full object-cover object-center lg:h-full lg:w-full"/>

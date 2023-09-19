@@ -1,7 +1,6 @@
 'use client'
 
 import React, {useState} from "react";
-import styles from '../styles/forms.module.css';
 import {signIn} from "next-auth/react";
 import {useRouter} from "next/navigation";
 
