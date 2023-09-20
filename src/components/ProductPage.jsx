@@ -40,8 +40,6 @@ export function ProductPage({id}) {
                     const error = (data && data.message) || response.status;
                     return Promise.reject(error);
                 }
-
-                console.log(`Product with id ${_id} added to cart`);
             })
             .catch(error => {
                 console.error('There was an error!', error);

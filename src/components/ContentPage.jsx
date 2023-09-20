@@ -1,17 +1,19 @@
 'use client'
 
 import {Fragment, useEffect, useState} from 'react'
-import {Dialog, Disclosure, Menu, Transition} from '@headlessui/react'
+import {Dialog, Disclosure, Listbox, Transition} from '@headlessui/react'
 import {XMarkIcon} from '@heroicons/react/24/outline'
-import {ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon} from '@heroicons/react/20/solid'
+import {ArrowsUpDownIcon, ChevronUpDownIcon, FunnelIcon, MinusIcon, PlusIcon} from '@heroicons/react/20/solid'
 import Product from "@/components/Product";
+import {useQueryState} from "@/hooks/useQueryState";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 
 const sortOptions = [
-    {name: 'Most Popular', href: '#', current: true},
-    {name: 'Best Rating', href: '#', current: false},
-    {name: 'Newest', href: '#', current: false},
-    {name: 'Price: Low to High', href: '#', current: false},
-    {name: 'Price: High to Low', href: '#', current: false},
+    {name: 'Most Popular', value: 'popular', current: true},
+    {name: 'Best Rating', value: 'rating', current: false},
+    {name: 'Newest', value: 'newest', current: false},
+    {name: 'Price: Low to High', value: 'priceup', current: false},
+    {name: 'Price: High to Low', value: 'pricedown', current: false},
 ]
 const subCategories = [
     {name: 'LPs', href: '#'},
@@ -22,26 +24,29 @@ const subCategories = [
 ]
 const filters = [
     {
-        id: 'color',
-        name: 'Color',
+        id: 'years',
+        name: 'Years',
         options: [
-            {value: 'white', label: 'White', checked: false},
-            {value: 'beige', label: 'Beige', checked: false},
-            {value: 'blue', label: 'Blue', checked: true},
-            {value: 'brown', label: 'Brown', checked: false},
-            {value: 'green', label: 'Green', checked: false},
-            {value: 'purple', label: 'Purple', checked: false},
+            {value: '60s', label: '60s', checked: false},
+            {value: '70s', label: '70s', checked: false},
+            {value: '80s', label: '80s', checked: true},
+            {value: '90s', label: '90s', checked: false},
+            {value: '2000s', label: '2000s', checked: false},
+            {value: '2010s', label: '2010s', checked: false},
+            {value: 'modern', label: 'Modern', checked: false},
         ],
     },
     {
-        id: 'category',
-        name: 'Category',
+        id: 'genre',
+        name: 'Genre',
         options: [
-            {value: 'new-arrivals', label: 'New Arrivals', checked: false},
-            {value: 'sale', label: 'Sale', checked: false},
-            {value: 'travel', label: 'Travel', checked: true},
-            {value: 'organization', label: 'Organization', checked: false},
-            {value: 'accessories', label: 'Accessories', checked: false},
+            {value: 'metal', label: 'Metal', checked: false},
+            {value: 'pop', label: 'Pop', checked: false},
+            {value: 'jazz', label: 'Jazz', checked: false},
+            {value: 'folk', label: 'Folk', checked: false},
+            {value: 'punk', label: 'Punk', checked: false},
+            {value: 'hip-hop', label: 'Hip-Hop', checked: false},
+            {value: 'rock', label: 'Rock', checked: false},
         ],
     },
 ]
@@ -51,19 +56,60 @@ function classNames(...classes) {
 }
 
 export default function ContentPage() {
-    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-    const [products, setProducts] = useState(null)
-    const [isLoading, setLoading] = useState(true)
-    const [searchQuery, setSearchQuery] = useState('');
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [products, setProducts] = useState(null);
+    const [isLoading, setLoading] = useState(true);
+    const [years, setYears] = useQueryState("years");
+    const [genre, setGenre] = useQueryState("genre");
+    const [sort, setSort] = useQueryState("sort");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
-        fetch(`/api/products?q=${searchQuery}`)
+        fetch(`/api/products?${searchParams.toString()}`)
             .then((res) => res.json())
             .then((data) => {
                 setProducts(data)
                 setLoading(false)
             })
-    }, [searchQuery])
+    }, [searchParams]);
+
+    const isChecked = (sectionName, value) => {
+        if (sectionName === "years") {
+            return years?.includes(value);
+        } else if (sectionName === "genre") {
+            return genre?.includes(value);
+        }
+    };
+
+    const handleFilterChange = async (event) => {
+        if (event.target.name === 'years') {
+            if (isChecked(event.target.name, event.target.value)) {
+                const newQuery = years.replace(`${event.target.value};`, "");
+                await setYears(newQuery);
+            } else {
+                const newQuery = (years) ?
+                    years + `${event.target.value};` :
+                    `${event.target.value};`;
+                await setYears(newQuery);
+            }
+        } else if (event.target.name === 'genre') {
+            if (isChecked(event.target.name, event.target.value)) {
+                const newQuery = genre.replace(`${event.target.value};`, "");
+                await setGenre(newQuery);
+            } else {
+                const newQuery = (genre) ?
+                    genre + `${event.target.value};` :
+                    `${event.target.value};`;
+                await setGenre(newQuery);
+            }
+        }
+    };
+
+    const emptyQuery = async () => {
+        router.push(pathname);
+    }
 
     if (isLoading) {
         return <h1>Loading...</h1>
@@ -136,33 +182,40 @@ export default function ContentPage() {
                                                                 className="flex w-full items-center justify-between
                                                                 bg-white px-2 py-3 text-gray-400 hover:text-gray-500">
                                                                 <span
-                                                                    className="font-medium text-gray-900">{section.name}
+                                                                    className="font-medium text-gray-900">
+                                                                    {section.name}
                                                                 </span>
                                                                 <span className="ml-6 flex items-center">
-                                  {open ? (
-                                      <MinusIcon className="h-5 w-5" aria-hidden="true"/>
-                                  ) : (
-                                      <PlusIcon className="h-5 w-5" aria-hidden="true"/>
-                                  )}
-                                </span>
+                                                                    {open ? (
+                                                                        <MinusIcon className="h-5 w-5"
+                                                                                   aria-hidden="true"/>
+                                                                    ) : (
+                                                                        <PlusIcon className="h-5 w-5"
+                                                                                  aria-hidden="true"/>
+                                                                    )}
+                                                                </span>
                                                             </Disclosure.Button>
                                                         </h3>
                                                         <Disclosure.Panel className="pt-6">
                                                             <div className="space-y-6">
-                                                                {section.options.map((option, optionIdx) => (
+                                                                {section.options.map((option, optionId) => (
                                                                     <div key={option.value}
                                                                          className="flex items-center">
                                                                         <input
-                                                                            id={`filter-mobile-${section.id}-${optionIdx}`}
-                                                                            name={`${section.id}[]`}
-                                                                            defaultValue={option.value}
+                                                                            id={`filter-${section.id}-${optionId}`}
+                                                                            name={section.id}
+                                                                            value={option.value}
                                                                             type="checkbox"
-                                                                            defaultChecked={option.checked}
+                                                                            checked={
+                                                                                isChecked(section.id, option.value) ||
+                                                                                false
+                                                                            }
+                                                                            onChange={handleFilterChange}
                                                                             className="h-4 w-4 rounded border-gray-300
                                                                             text-indigo-600 focus:ring-indigo-500"
                                                                         />
                                                                         <label
-                                                                            htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
+                                                                            htmlFor={`filter-mobile-${section.id}-${optionId}`}
                                                                             className="ml-3 min-w-0 flex-1 text-gray-500"
                                                                         >
                                                                             {option.label}
@@ -187,18 +240,38 @@ export default function ContentPage() {
                         <h1 className="text-4xl font-bold tracking-tight text-gray-900">New Arrivals</h1>
 
                         <div className="flex items-center">
-                            <Menu as="div" className="relative inline-block text-left">
+                            <button
+                                className="group inline-flex justify-center text-sm
+                                shadow-2xl ring-1 ring-black ring-opacity-5 bg-white mx-4
+                                px-4 py-2 rounded-md font-medium text-gray-700 hover:text-gray-900"
+                                onClick={emptyQuery}
+                            >
+                                Reset filters
+                                <XMarkIcon
+                                    className="-mr-1 ml-1 h-5 w-5 flex-shrink-0
+                                            text-gray-400 group-hover:text-gray-500"
+                                    aria-hidden="true">
+                                </XMarkIcon>
+                            </button>
+                            <Listbox as="div" className="relative inline-block text-left
+                            shadow-2xl ring-1 ring-black ring-opacity-5 bg-white px-4 py-1 rounded-md">
                                 <div>
-                                    <Menu.Button
-                                        className="group inline-flex justify-center
-                                        text-sm font-medium text-gray-700 hover:text-gray-900">
-                                        Sort
-                                        <ChevronDownIcon
-                                            className="-mr-1 ml-1 h-5 w-5
-                                            flex-shrink-0 text-gray-400 group-hover:text-gray-500"
-                                            aria-hidden="true"
-                                        />
-                                    </Menu.Button>
+                                    <Listbox.Button
+                                        className="group inline-flex justify-center text-sm
+                                        font-medium text-gray-700 hover:text-gray-900"
+                                    >
+                                        <ArrowsUpDownIcon
+                                            className="-ml-3 mr-3 h-5 w-5 flex-shrink-0
+                                            text-gray-400 group-hover:text-gray-500"
+                                            aria-hidden="true">
+                                        </ArrowsUpDownIcon>
+                                        {sortOptions.find(option => option.value === sort)?.name || "Sort by"}
+                                        <ChevronUpDownIcon
+                                            className="-mr-1 ml-1 h-5 w-5 flex-shrink-0
+                                            text-gray-400 group-hover:text-gray-500"
+                                            aria-hidden="true">
+                                        </ChevronUpDownIcon>
+                                    </Listbox.Button>
                                 </div>
 
                                 <Transition
@@ -210,36 +283,39 @@ export default function ContentPage() {
                                     leaveFrom="transform opacity-100 scale-100"
                                     leaveTo="transform opacity-0 scale-95"
                                 >
-                                    <Menu.Items
-                                        className="absolute right-0 z-10 mt-2 w-40
-                                        origin-top-right rounded-md bg-white shadow-2xl
-                                        ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                        <div className="py-1">
-                                            {sortOptions.map((option) => (
-                                                <Menu.Item key={option.name}>
-                                                    {({active}) => (
-                                                        <a
-                                                            href={option.href}
-                                                            className={classNames(
-                                                                option.current ?
-                                                                    'font-medium text-gray-900'
-                                                                    : 'text-gray-500',
-                                                                active ? 'bg-gray-100' : '',
-                                                                'block px-4 py-2 text-sm'
-                                                            )}
-                                                        >
-                                                            {option.name}
-                                                        </a>
-                                                    )}
-                                                </Menu.Item>
-                                            ))}
-                                        </div>
-                                    </Menu.Items>
+                                    <Listbox.Options
+                                        className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md
+                                        bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                    >
+                                        {sortOptions.map((option) => (
+                                            <Listbox.Option
+                                                key={option.value}
+                                                value={option.name}
+                                            >
+                                                {({active}) => (
+                                                    <a
+                                                        className={classNames(
+                                                            sort === option.value ?
+                                                                'font-medium text-gray-900' :
+                                                                'text-gray-500',
+                                                            active ? 'bg-gray-100' : '',
+                                                            'block px-4 py-2 text-sm'
+                                                        )}
+                                                        onClick={() => setSort(option.value)}
+                                                    >
+                                                        {option.name}
+                                                    </a>
+                                                )}
+                                            </Listbox.Option>
+                                        ))}
+                                    </Listbox.Options>
                                 </Transition>
-                            </Menu>
+                            </Listbox>
+
                             <button
                                 type="button"
-                                className="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden"
+                                className="-m-2 ml-4 p-2 text-gray-400
+                                hover:text-gray-500 sm:ml-6 lg:hidden"
                                 onClick={() => setMobileFiltersOpen(true)}
                             >
                                 <span className="sr-only">Filters</span>
@@ -254,6 +330,7 @@ export default function ContentPage() {
                         </h2>
 
                         <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
+
                             {/* Filters */}
                             <form className="hidden lg:block">
                                 <h3 className="sr-only">Categories</h3>
@@ -278,12 +355,12 @@ export default function ContentPage() {
                                                         <span
                                                             className="font-medium text-gray-900">{section.name}</span>
                                                         <span className="ml-6 flex items-center">
-                              {open ? (
-                                  <MinusIcon className="h-5 w-5" aria-hidden="true"/>
-                              ) : (
-                                  <PlusIcon className="h-5 w-5" aria-hidden="true"/>
-                              )}
-                            </span>
+                                                            {open ? (
+                                                                <MinusIcon className="h-5 w-5" aria-hidden="true"/>
+                                                            ) : (
+                                                                <PlusIcon className="h-5 w-5" aria-hidden="true"/>
+                                                            )}
+                                                        </span>
                                                     </Disclosure.Button>
                                                 </h3>
                                                 <Disclosure.Panel className="pt-6">
@@ -292,10 +369,14 @@ export default function ContentPage() {
                                                             <div key={option.value} className="flex items-center">
                                                                 <input
                                                                     id={`filter-${section.id}-${optionIdx}`}
-                                                                    name={`${section.id}[]`}
-                                                                    defaultValue={option.value}
+                                                                    name={section.id}
+                                                                    value={option.value}
                                                                     type="checkbox"
-                                                                    defaultChecked={option.checked}
+                                                                    checked={
+                                                                        isChecked(section.id, option.value) ||
+                                                                        false
+                                                                    }
+                                                                    onChange={handleFilterChange}
                                                                     className="h-4 w-4 rounded border-gray-300
                                                                     text-indigo-600 focus:ring-indigo-500"
                                                                 />
@@ -317,9 +398,8 @@ export default function ContentPage() {
 
                             {/* Product grid */}
                             <div className="lg:col-span-3">
-                                <div
-                                    className="mt-2 grid grid-cols-1 gap-x-6
-                                    gap-y-10 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-8">
+                                <div className="mt-2 grid grid-cols-1 gap-x-6
+                                gap-y-10 sm:grid-cols-2 xl:grid-cols-3 xl:gap-x-8">
                                     {products.map((product) => {
                                             return (
                                                 <Product key={product._id} item={{

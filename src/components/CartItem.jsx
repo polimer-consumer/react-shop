@@ -20,8 +20,6 @@ export function CartItem({item, deleteItem, setLoading}) {
                         const error = response.status;
                         return Promise.reject(error);
                     }
-
-                    console.log(`Quantity of item ${itemId} changed`);
                 })
                 .catch(error => {
                     console.error('There was an error!', error);
@@ -35,7 +33,6 @@ export function CartItem({item, deleteItem, setLoading}) {
 
     function deleteFromCart() {
         deleteItem(itemId)
-        console.log(`Deleted ${itemId} from cart`)
     }
 
     return (

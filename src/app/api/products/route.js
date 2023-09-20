@@ -4,17 +4,16 @@ import Product from "@/models/product";
 
 export async function GET(req) {
     const {searchParams} = new URL(req.url);
-    const query = searchParams.get('q');
+    const genres = searchParams.get('genre');
 
     await connectMongoDB();
+
     let products;
 
-    if (query) {
+    if (genres) {
+        const genresArray = genres.slice(0, -1).split(';');
         products = await Product.find({
-            $or: [
-                { album: { $regex: query, $options: 'i' } },
-                { artist: { $regex: query, $options: 'i' } },
-            ],
+            genre: { $in: genresArray.map(genre => new RegExp(genre, "i")) }
         });
     } else {
         products = await Product.find();

@@ -1,15 +1,15 @@
 import {useCallback} from "react"
-import {useLocation} from "react-router-dom"
-import {useRouter} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import qs from "qs"
 
 export const useQueryState = (query) => {
-    const location = useLocation();
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const setQuery = useCallback(
         value => {
-            const existingQueries = qs.parse(location.search, {
+            const existingQueries = qs.parse(searchParams.toString(), {
                 ignoreQueryPrefix: true,
             })
 
@@ -18,13 +18,13 @@ export const useQueryState = (query) => {
                 {skipNulls: true}
             )
 
-            router.push(`${location.pathname}?${queryString}`)
+            router.push(`${pathname}?${queryString}`)
         },
-        [router, location, query]
+        [router, pathname, query, searchParams]
     )
 
     return [
-        qs.parse(location.search, {ignoreQueryPrefix: true})[query],
+        qs.parse(searchParams.toString(), {ignoreQueryPrefix: true})[query],
         setQuery,
     ]
 }

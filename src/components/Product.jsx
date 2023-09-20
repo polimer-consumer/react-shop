@@ -28,7 +28,7 @@ export default function Product({item}) {
             image: image,
             quantity: quantity
         });
-        console.log(reqBody);
+
         fetch(`api/cart/${productId}`, {method: "POST", body: reqBody})
             .then(async response => {
                 const data = await response.json();
@@ -37,8 +37,6 @@ export default function Product({item}) {
                     const error = (data && data.message) || response.status;
                     return Promise.reject(error);
                 }
-
-                console.log(`${quantity} items of product with id ${productId} added to cart`);
             })
             .catch(error => {
                 console.error('There was an error!', error);
