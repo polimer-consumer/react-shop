@@ -7,6 +7,7 @@ import Link from "next/link";
 
 export default function Product({item}) {
     const [quantity, setQuantity] = useState(1);
+    const session = useSession();
 
     const changeQuantity = (amount) => {
         setQuantity((prevQuantity) => {
@@ -20,31 +21,75 @@ export default function Product({item}) {
     const {image, genre, price, artist, album, productId} = item;
 
     const addToCart = async () => {
-        const reqBody = JSON.stringify({
-            album: album,
-            artist: artist,
-            genre: genre,
-            price: price,
-            image: image,
-            quantity: quantity
-        });
-
-        fetch(`api/cart/${productId}`, {method: "POST", body: reqBody})
-            .then(async response => {
-                const data = await response.json();
-
-                if (!response.ok) {
-                    const error = (data && data.message) || response.status;
-                    return Promise.reject(error);
-                }
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
+        if (session?.data?.user?.email !== undefined) {
+            const reqBody = JSON.stringify({
+                album: album,
+                artist: artist,
+                genre: genre,
+                price: price,
+                image: image,
+                quantity: quantity,
+                localCart: JSON.parse(localStorage.getItem("cart")),
             });
+
+            fetch(`api/cart/${productId}`, {method: "POST", body: reqBody})
+                .then(async response => {
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        const error = (data && data.message) || response.status;
+                        return Promise.reject(error);
+                    }
+                })
+                .catch(error => {
+                    console.error('There was an error!', error);
+                });
+
+            localStorage.removeItem("cart");
+        } else {
+            addToLocalStorage();
+        }
 
         setQuantity(1);
     };
 
+    const addToLocalStorage = () => {
+        let cart = {};
+
+        if (localStorage.getItem("cart")) {
+            cart = JSON.parse(localStorage.getItem("cart"));
+            const cartItem = cart.cartItems.find((item) => item.productId === productId);
+            if (cartItem) {
+                cartItem.quantity += quantity;
+            } else {
+                cart.cartItems.push({
+                    productId: productId,
+                    album: album,
+                    artist: artist,
+                    genre: genre,
+                    price: price,
+                    image: image,
+                    quantity: quantity,
+                })
+            }
+        } else {
+            cart = {
+                cartItems: [
+                    {
+                        productId: productId,
+                        album: album,
+                        artist: artist,
+                        genre: genre,
+                        price: price,
+                        image: image,
+                        quantity: quantity,
+                    }
+                ]
+            }
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }
 
     return (
         <div className="group relative bg-gray-50 shadow-2xl p-2 rounded-lg">

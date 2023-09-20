@@ -8,7 +8,7 @@ export async function POST(req, {params}) {
     const productId = params.id;
     const session = await getServerSession(authConfig);
     const email = session?.user?.email;
-    const {album, artist, genre, price, image, quantity} = await req.json();
+    const {album, artist, genre, price, image, quantity, localCart} = await req.json();
 
     await connectMongoDB();
 
@@ -16,7 +16,28 @@ export async function POST(req, {params}) {
         .exec()
         .then((cart) => {
             if (!cart) {
-                cart = new Cart({userEmail: email, cartItems: []});
+                cart = new Cart({userEmail: email, cartItems: (localCart?.cartItems || [])});
+            } else if (localCart?.cartItems !== undefined) {
+                localCart.cartItems.map((localItem) => {
+                    const cartItemIndex = cart.cartItems.findIndex(
+                        (item) => item.productId === localItem.productId
+                    );
+                    if (cartItemIndex !== -1) {
+                        cart.cartItems[cartItemIndex].quantity += localItem.quantity;
+                    } else {
+                        const newItem = {
+                            productId: localItem.productId,
+                            album: localItem.album,
+                            artist: localItem.artist,
+                            genre: localItem.genre,
+                            price: localItem.price,
+                            image: localItem.image,
+                            quantity: localItem.quantity
+                        };
+
+                        cart.cartItems.push(newItem);
+                    }
+                })
             }
 
             const cartItemIndex = cart.cartItems.findIndex(

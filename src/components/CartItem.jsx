@@ -4,30 +4,41 @@ import React, {useState} from "react";
 import {AiFillDelete} from "react-icons/ai";
 import {LuDelete} from "react-icons/lu";
 import {MdOutlineDelete} from "react-icons/md";
+import {useSession} from "next-auth/react";
 
 export function CartItem({item, deleteItem, setLoading}) {
     const [quantity, setQuantity] = useState(item.quantity);
+    const session = useSession();
 
     const {image, genre, price, artist, album, itemId} = item;
 
     const changeQuantity = async (amount) => {
         if (!(amount === -1 && quantity <= 1)) {
-            const reqBody = JSON.stringify({amount: amount});
-            await fetch(`api/cart/${itemId}`,
-                {method: "PATCH", body: reqBody})
-                .then(async response => {
-                    if (!response.ok) {
-                        const error = response.status;
-                        return Promise.reject(error);
-                    }
-                })
-                .catch(error => {
-                    console.error('There was an error!', error);
-                });
-            setQuantity((prevQuantity) => {
-                return prevQuantity + amount;
-            });
-            // setLoading(true);
+            if (session?.data?.user?.email !== undefined) {
+                const reqBody = JSON.stringify({amount: amount});
+                await fetch(`api/cart/${itemId}`,
+                    {method: "PATCH", body: reqBody})
+                    .then(async response => {
+                        if (!response.ok) {
+                            const error = response.status;
+                            return Promise.reject(error);
+                        }
+
+                        setQuantity((prevQuantity) => {
+                            return prevQuantity + amount;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });
+            } else {
+                const cart = JSON.parse(localStorage.getItem("cart"));
+                const itemIndex = cart.cartItems.findIndex((item) => item.productId === itemId);
+                console.log(itemIndex);
+                cart.cartItems[itemIndex].quantity += amount;
+                localStorage.setItem("cart", JSON.stringify(cart));
+            }
+            setLoading(true);
         }
     };
 

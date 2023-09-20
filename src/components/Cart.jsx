@@ -32,29 +32,42 @@ export function Cart() {
 
 
     useEffect(() => {
-        fetch('api/cart')
-            .then((res) => res.json())
-            .then((data) => {
-                dispatch({type: 'set', payload: data});
-                setLoading(false)
-            })
+        console.log(session?.data?.user?.email);
+        if (session?.data?.user?.email !== undefined) {
+            // TODO: Add cart fetching from localstorage
+            fetch('api/cart')
+                .then((res) => res.json())
+                .then((data) => {
+                    dispatch({type: "set", payload: data});
+                    setLoading(false);
+                })
+        } else {
+            dispatch({type: "set", payload: (JSON.parse(localStorage.getItem("cart"))?.cartItems || [])});
+            setLoading(false);
+        }
     }, [isLoading])
 
     function handleDelete(id) {
-        fetch(`api/cart/${id}`, {method: 'DELETE'})
-            .then(async response => {
-                const data = await response.json();
+        if (session?.data?.user?.email !== undefined) {
+            fetch(`api/cart/${id}`, {method: 'DELETE'})
+                .then(async response => {
+                    const data = await response.json();
 
-                if (!response.ok) {
-                    const error = (data && data.message) || response.status;
-                    return Promise.reject(error);
-                }
+                    if (!response.ok) {
+                        const error = (data && data.message) || response.status;
+                        return Promise.reject(error);
+                    }
+                })
+                .catch(error => {
+                    console.error('There was an error!', error);
+                })
+        } else {
+            const cart = JSON.parse(localStorage.getItem("cart"));
+            cart.cartItems = cart.cartItems.filter((item) => item.productId !== id);
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
 
-                setLoading(true);
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
-            })
+        setLoading(true);
     }
 
     if (isLoading) {

@@ -8,6 +8,8 @@ export async function GET(req) {
     const session = await getServerSession(authConfig);
     const email = session?.user?.email;
 
+    // TODO: Add cart fetching from localstorage
+
     if (!email) {
         return NextResponse.json([]);
     }

@@ -8,6 +8,7 @@ export function ProductPage({id}) {
     const [showInfo, setShowInfo] = useState(false);
     const [showContacts, setShowContacts] = useState(false);
     const [isLoading, setLoading] = useState(true)
+    const session = useSession();
 
     useEffect(() => {
         fetch(`/api/products/${id}`)
@@ -22,29 +23,75 @@ export function ProductPage({id}) {
     }, [])
 
     const addToCart = async () => {
-        const {image, genre, price, artist, album, _id} = product;
-        fetch(`/api/cart/${_id}`, {
-            method: "POST", body: JSON.stringify({
-                album: album,
-                artist: artist,
-                genre: genre,
-                price: price,
-                image: image,
-                quantity: 1
+        if (session?.data?.user?.email !== undefined) {
+            const {image, genre, price, artist, album, _id} = product;
+            fetch(`/api/cart/${_id}`, {
+                method: "POST", body: JSON.stringify({
+                    album: album,
+                    artist: artist,
+                    genre: genre,
+                    price: price,
+                    image: image,
+                    quantity: 1,
+                    localCart: JSON.parse(localStorage.getItem("cart")),
+                })
             })
-        })
-            .then(async response => {
-                const data = await response.json();
+                .then(async response => {
+                    const data = await response.json();
 
-                if (!response.ok) {
-                    const error = (data && data.message) || response.status;
-                    return Promise.reject(error);
-                }
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
-            });
+                    if (!response.ok) {
+                        const error = (data && data.message) || response.status;
+                        return Promise.reject(error);
+                    }
+                })
+                .catch(error => {
+                    console.error('There was an error!', error);
+                });
+
+            localStorage.removeItem("cart");
+        } else {
+            addToLocalStorage();
+        }
     };
+
+    const addToLocalStorage = () => {
+        const {image, genre, price, artist, album, _id} = product;
+        let cart = {};
+
+        if (localStorage.getItem("cart")) {
+            cart = JSON.parse(localStorage.getItem("cart"));
+            const cartItem = cart.cartItems.find((item) => item.productId === _id);
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.cartItems.push({
+                    productId: _id,
+                    album: album,
+                    artist: artist,
+                    genre: genre,
+                    price: price,
+                    image: image,
+                    quantity: _id,
+                })
+            }
+        } else {
+            cart = {
+                cartItems: [
+                    {
+                        productId: _id,
+                        album: album,
+                        artist: artist,
+                        genre: genre,
+                        price: price,
+                        image: image,
+                        quantity: 1,
+                    }
+                ]
+            }
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }
 
     if (isLoading) {
         return <h1>Loading...</h1>
