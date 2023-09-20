@@ -32,15 +32,31 @@ export function Cart() {
 
 
     useEffect(() => {
-        console.log(session?.data?.user?.email);
         if (session?.data?.user?.email !== undefined) {
-            // TODO: Add cart fetching from localstorage
-            fetch('api/cart')
-                .then((res) => res.json())
-                .then((data) => {
-                    dispatch({type: "set", payload: data});
-                    setLoading(false);
-                })
+            if (localStorage.getItem("cart") !== undefined) {
+                const reqBody = JSON.stringify(
+                    {
+                        localCart: JSON.parse(localStorage.getItem("cart")),
+                    });
+                fetch(`api/cart`,
+                    {method: "PATCH", body: reqBody})
+                    .then(async response => {
+                        if (!response.ok) {
+                            const error = response.status;
+                            return Promise.reject(error);
+                        }
+                        fetch('api/cart')
+                            .then((res) => res.json())
+                            .then((data) => {
+                                dispatch({type: "set", payload: data});
+                                setLoading(false);
+                            })
+                        localStorage.removeItem("cart");
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });
+            }
         } else {
             dispatch({type: "set", payload: (JSON.parse(localStorage.getItem("cart"))?.cartItems || [])});
             setLoading(false);

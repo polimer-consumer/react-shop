@@ -34,7 +34,6 @@ export function CartItem({item, deleteItem, setLoading}) {
             } else {
                 const cart = JSON.parse(localStorage.getItem("cart"));
                 const itemIndex = cart.cartItems.findIndex((item) => item.productId === itemId);
-                console.log(itemIndex);
                 cart.cartItems[itemIndex].quantity += amount;
                 localStorage.setItem("cart", JSON.stringify(cart));
             }

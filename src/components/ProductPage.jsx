@@ -71,7 +71,7 @@ export function ProductPage({id}) {
                     genre: genre,
                     price: price,
                     image: image,
-                    quantity: _id,
+                    quantity: 1,
                 })
             }
         } else {
